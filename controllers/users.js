@@ -13,10 +13,16 @@ module.exports.getUser = (req, res) => {
   const userID = req.params.userId;
 
   User.findById(userID)
-    .then((user) => res.status(200).send(user))
+    .then((user) => {
+      if (user === null) {
+        res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
+        return;
+      }
+      res.status(200).send({ user });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
+        res.status(400).send({ message: 'Запрашиваемый пользователь не найден' });
         return;
       }
       res.status(500).send({ message: err.message });
