@@ -33,8 +33,17 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
 
+  if (cardId.length !== 24) {
+    res.status(400).send({ message: 'Переданы некорректные данные.' });
+    return;
+  }
+
   Card.findByIdAndRemove(cardId)
     .then((card) => {
+      if (card === null) {
+        res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
+        return;
+      }
       res.status(200);
       res.send({ data: card });
     })
@@ -51,20 +60,26 @@ module.exports.likeCard = (req, res) => {
   const { cardId } = req.params;
   const userId = req.user._id;
 
+  if (cardId.length !== 24) {
+    res.status(400).send({ message: 'Переданы некорректные данные.' });
+    return;
+  }
+
   Card.findByIdAndUpdate(
     cardId,
     { $addToSet: { likes: userId } },
     { new: true },
   )
+    .populate(['owner', 'likes'])
     .then((card) => {
+      if (card === null) {
+        res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
+        return;
+      }
       res.status(200);
       res.send({ data: card });
     })
     .catch((err) => {
-      if (err.path === 'likes') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-        return;
-      }
       if (err.path === '_id') {
         res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
         return;
@@ -77,12 +92,22 @@ module.exports.dislikeCard = (req, res) => {
   const { cardId } = req.params;
   const userId = req.user._id;
 
+  if (cardId.length !== 24) {
+    res.status(400).send({ message: 'Переданы некорректные данные.' });
+    return;
+  }
+
   Card.findByIdAndUpdate(
     cardId,
     { $pull: { likes: userId } },
     { new: true },
   )
+    .populate(['owner', 'likes'])
     .then((card) => {
+      if (card === null) {
+        res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
+        return;
+      }
       res.status(200);
       res.send({ data: card });
     })
