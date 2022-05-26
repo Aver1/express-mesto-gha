@@ -49,7 +49,7 @@ module.exports.deleteCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
+        res.status(400).send({ message: 'Указан некорректный id.' });
         return;
       }
       res.status(500).send({ message: err.message });
@@ -81,7 +81,7 @@ module.exports.likeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.path === '_id') {
-        res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
+        res.status(400).send({ message: 'Указан некорректный id.' });
         return;
       }
       res.status(500).send({ err });
@@ -111,5 +111,11 @@ module.exports.dislikeCard = (req, res) => {
       res.status(200);
       res.send({ data: card });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Указан некорректный id.' });
+        return;
+      }
+      res.status(500).send({ err });
+    });
 };

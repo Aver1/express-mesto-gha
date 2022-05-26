@@ -60,10 +60,6 @@ module.exports.updateAvatar = (req, res) => {
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
-        return;
-      }
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'avatar are not correct' });
         return;
@@ -84,10 +80,6 @@ module.exports.updateProfile = (req, res) => {
   User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
-        return;
-      }
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'name, about are not correct' });
         return;
