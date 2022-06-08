@@ -67,7 +67,15 @@ module.exports.createUser = (req, res, next) => {
       about,
       name,
     }))
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.status(200).send({
+      data:
+      {
+        email: user.email,
+        avatar: user.avatar,
+        name: user.name,
+        about: user.about,
+      },
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         // res.status(400).send({ message: 'name, about or avatar are not correct' });
@@ -145,6 +153,9 @@ module.exports.getUserProfile = (req, res, next) => {
   const { _id } = req.user;
   User.find({ _id })
     .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден!');
+      }
       res.status(200);
       res.send({ data: user });
     })
