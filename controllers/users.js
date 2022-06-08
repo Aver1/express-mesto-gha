@@ -151,9 +151,12 @@ module.exports.login = (req, res, next) => {
 
 module.exports.getUserProfile = (req, res, next) => {
   const { _id } = req.user;
-  User.find({ _id })
+  User.findById({ _id })
     .then((user) => {
       if (!user) {
+        throw new NotFoundError('Пользователь не найден!');
+      }
+      if (user === null) {
         throw new NotFoundError('Пользователь не найден!');
       }
       res.status(200);
