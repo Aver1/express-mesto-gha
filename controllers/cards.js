@@ -1,68 +1,82 @@
 const Card = require('../models/card');
+const NotFoundError = require('../errors/NotFoundError');
+const ValidarionErrror = require('../errors/ValidarionErrror');
+const UnAuthorizedError = require('../errors/UnAuthorizedError');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((cards) => {
       res.status(200);
       res.send(cards);
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const userId = req.user._id;
 
   if (!name || !link) {
-    res.status(400).send({ message: 'name or link are not correct' });
-    return;
+    // res.status(400).send({ message: 'name or link are not correct' });
+    // return;
+    throw new ValidarionErrror('name or link are not correct');
   }
 
   Card.create({ name, link, owner: userId })
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'name, link are not correct' });
-        return;
+        // res.status(400).send({ message: 'name, link are not correct' });
+        // return;
+        return next(new ValidarionErrror('name, link are not correct'));
       }
-      res.status(500).send({ message: err.message });
+      return next(err);
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
+  const { _id } = req.user;
 
   if (cardId.length !== 24) {
-    res.status(400).send({ message: 'Переданы некорректные данные.' });
-    return;
+    // res.status(400).send({ message: 'Переданы некорректные данные.' });
+    // return;
+    throw new ValidarionErrror('Переданы некорректные данные.');
   }
 
-  Card.findByIdAndRemove(cardId)
+  Card.findById(cardId)
     .then((card) => {
       if (card === null) {
-        res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
-        return;
+        // res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
+        // return;
+        throw new NotFoundError('Карточка с указанным id не найдена.');
       }
-      res.status(200);
-      res.send({ data: card });
+      if (!card.owner.equals(_id)) {
+        // res.status(401).send({ message: 'У вас нет прав на это действие.' });
+        // return;
+        throw new UnAuthorizedError('У вас нет прав на это действие.');
+      }
+      card.remove().then(() => res.status(200).send({ data: card }));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Указан некорректный id.' });
-        return;
+        // res.status(400).send({ message: 'Указан некорректный id.' });
+        // return;
+        return next(new ValidarionErrror('Указан некорректный id.'));
       }
-      res.status(500).send({ message: err.message });
+      return next(err);
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
   const userId = req.user._id;
 
   if (cardId.length !== 24) {
-    res.status(400).send({ message: 'Переданы некорректные данные.' });
-    return;
+    // res.status(400).send({ message: 'Переданы некорректные данные.' });
+    // return;
+    throw new ValidarionErrror('Переданы некорректные данные.');
   }
 
   Card.findByIdAndUpdate(
@@ -73,28 +87,31 @@ module.exports.likeCard = (req, res) => {
     .populate(['owner', 'likes'])
     .then((card) => {
       if (card === null) {
-        res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
-        return;
+        // res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
+        // return;
+        throw new NotFoundError('Карточка с указанным id не найдена.');
       }
       res.status(200);
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.path === '_id') {
-        res.status(400).send({ message: 'Указан некорректный id.' });
-        return;
+        // res.status(400).send({ message: 'Указан некорректный id.' });
+        // return;
+        return next(new ValidarionErrror('Указан некорректный id.'));
       }
-      res.status(500).send({ err });
+      return next(err);
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
   const userId = req.user._id;
 
   if (cardId.length !== 24) {
-    res.status(400).send({ message: 'Переданы некорректные данные.' });
-    return;
+    // res.status(400).send({ message: 'Переданы некорректные данные.' });
+    // return;.
+    throw new ValidarionErrror('Переданы некорректные данные.');
   }
 
   Card.findByIdAndUpdate(
@@ -105,17 +122,19 @@ module.exports.dislikeCard = (req, res) => {
     .populate(['owner', 'likes'])
     .then((card) => {
       if (card === null) {
-        res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
-        return;
+        // res.status(404).send({ message: 'Карточка с указанным id не найдена.' });
+        // return;
+        throw new NotFoundError('Карточка с указанным id не найдена.');
       }
       res.status(200);
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Указан некорректный id.' });
-        return;
+        // res.status(400).send({ message: 'Указан некорректный id.' });
+        // return;
+        return next(new ValidarionErrror('Указан некорректный id.'));
       }
-      res.status(500).send({ err });
+      return next(err);
     });
 };
