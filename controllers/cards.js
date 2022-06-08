@@ -1,7 +1,7 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/NotFoundError');
 const ValidarionErrror = require('../errors/ValidarionErrror');
-const UnAuthorizedError = require('../errors/UnAuthorizedError');
+const PermissionError = require('../errors/PermissionError');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -55,7 +55,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card.owner.equals(_id)) {
         // res.status(401).send({ message: 'У вас нет прав на это действие.' });
         // return;
-        throw new UnAuthorizedError('У вас нет прав на это действие.');
+        throw new PermissionError('У вас нет прав на это действие.');
       }
       card.remove().then(() => res.status(200).send({ data: card }));
     })
