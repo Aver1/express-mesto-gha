@@ -57,7 +57,7 @@ module.exports.deleteCard = (req, res, next) => {
         // return;
         throw new PermissionError('У вас нет прав на это действие.');
       }
-      card.remove().then(() => res.status(200).send({ data: card }));
+      return card.remove().then(() => res.status(200).send({ data: card }));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
