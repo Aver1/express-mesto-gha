@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      validate: {
+        validator: (email) => validator.isEmail(email),
+        message: 'URL validation failed',
+      },
     },
     password: {
       type: String,
