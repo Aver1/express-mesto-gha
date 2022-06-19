@@ -7,6 +7,7 @@ const auth = require('./middlewares/auth');
 const error = require('./middlewares/error');
 const NotFoundError = require('./errors/NotFoundError');
 const { login, createUser } = require('./controllers/users');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 
@@ -14,6 +15,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
+
+app.use(requestLogger);
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -40,6 +43,8 @@ app.use((req, res, next) => {
   // res.status(404).send({ message: 'Error 404' });
   next(new NotFoundError('Error 404'));
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 
