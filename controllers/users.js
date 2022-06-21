@@ -162,7 +162,7 @@ module.exports.getUserProfile = (req, res, next) => {
         throw new NotFoundError('Пользователь не найден!');
       }
       res.status(200);
-      res.send(user);
+      res.send({ data: user });
     })
     .catch(next);
 };
