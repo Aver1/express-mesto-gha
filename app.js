@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
+const cors = require('cors');
 const regExp = require('./utils/regExp');
 const auth = require('./middlewares/auth');
 const error = require('./middlewares/error');
@@ -9,7 +10,7 @@ const NotFoundError = require('./errors/NotFoundError');
 const { login, createUser } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 require('dotenv').config();
-const corsAllowed = require('./middlewares/cors-config');
+// const corsAllowed = require('./middlewares/cors-config');
 
 const app = express();
 
@@ -17,6 +18,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
+
+app.use(cors());
 
 app.use(requestLogger);
 
@@ -43,7 +46,6 @@ app.post('/signup', celebrate({
 }), createUser);
 
 app.use(auth);
-app.use(corsAllowed);
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
