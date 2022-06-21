@@ -28,7 +28,7 @@ module.exports.getUser = (req, res, next) => {
         // return;
         throw new NotFoundError('Запрашиваемый пользователь не найден');
       }
-      res.status(200).send({ user });
+      res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
