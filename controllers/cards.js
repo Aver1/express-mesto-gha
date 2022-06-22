@@ -24,7 +24,15 @@ module.exports.createCard = (req, res, next) => {
   }
 
   Card.create({ name, link, owner: userId })
-    .then((card) => res.status(200).send(card))
+    // .then((card) => res.status(200).send(card))
+    .then((card) => res.status(200).send({
+      name: card.name,
+      owner: { _id: card.owner },
+      link: card.link,
+      _id: card._id,
+      likes: card.likes,
+      createdAt: card.createdAt,
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         // res.status(400).send({ message: 'name, link are not correct' });
