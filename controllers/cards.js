@@ -23,7 +23,7 @@ module.exports.createCard = (req, res, next) => {
     throw new ValidarionErrror('name or link are not correct');
   }
 
-  Card.create({ name, link, owner: userId })
+  Card.create({ name, link, owner: { _id: userId } })
     .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
